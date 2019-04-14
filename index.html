@@ -502,7 +502,7 @@
 <p>###选择排序  </p>
 <p>###插入排序  </p>
 <p>##<strong>其次来说时间复杂度为O(n logn)级别的算法</strong>。  </p>
-<p>###归并排序<br>归并排序算法思想：对于两组<strong>有序</strong>的数据，我们可以对之进行合并并排好序。因此，我们可以利用<strong>递归</strong>，将数据进行拆分，每次2分，直到拆到只有一个数据，一个数据本身就是有序的，然后再归并，归并的过程中调用我们写好的对两组有序的数据进行归并并排序的算法。当递归归并完成时，就排好序了。<br><strong>代码实现</strong>：  </p>
+<p>###归并排序<br><strong>归并排序递归算法思想</strong>：对于两组<strong>有序</strong>的数据，我们可以对之进行合并并排好序。因此，我们可以利用<strong>递归</strong>， 将数据进行拆分，每次2分，直到拆到只有一个数据，一个数据本身就是有序的，然后再归并，归并的过程中调用我们写好的对两组有序的数据进行归并并排序的算法。当递归归并完成时，就排好序了。<br>图片演示:<img src="https://i.imgur.com/iPLOd64.png" alt><br><strong>递归代码实现</strong>  </p>
 <pre><code>public class SortLiner {
 SortTestHelper sth=new SortTestHelper();
 //归并排序
@@ -552,8 +552,142 @@ SortTestHelper sth=new SortTestHelper();
 
 
 }  
-</code></pre><p>}<br><strong>注意点</strong><br>1.归并排序每次进行merge操作的时候，要进行额外的空间的开辟。这也是归并排序的缺点之一。<br>2.创建的数组的索引和原数组的索引差了L个偏移量。在对copy数组元素进行比较的时候，注意是比较的copy[i-L] copy[j-L]<br>3.数组越界问题的处理（<strong>容易忽略</strong>) i&gt;mid 和 j&gt;R 的处理。<br>4.边界问题的处理。  边界问题很关键，往往能决定你的代码能否写成功。首先，定义你的索引边界，是闭区间还是开区间，然后去维护你的索引，这点很关键。  对取到和取不到进行考虑。<br><strong>归并算法的优化</strong><br>1.当递归到l-r&lt;15的时候，进行插入排序，会有更好的效果。（<em>不知道为啥？？？待处理</em>）<br>2.如果copy[mid]&lt;copy[mid+1],此时就不用再进行merge操作了，已经有序了</p>
-<p>###快速排序  </p>
+</code></pre><p>}  </p>
+<p><strong>递归实现注意点</strong><br>1.归并排序每次进行merge操作的时候，要进行额外的空间的开辟。这也是归并排序的缺点之一。<br>2.创建的数组的索引和原数组的索引差了L个偏移量。在对copy数组元素进行比较的时候，注意是比较的copy[i-L] copy[j-L]<br>3.数组越界问题的处理（<strong>容易忽略</strong>) i&gt;mid 和 j&gt;R 的处理。<br>4.边界问题的处理。  边界问题很关键，往往能决定你的代码能否写成功。首先，定义你的索引边界，是闭区间还是开区间，然后去维护你的索引，这点很关键。  对取到和取不到进行考虑。  </p>
+<p><strong>非递归代码实现</strong>  </p>
+<pre><code>//归并排序，自底向上排序 (不使用递归，使用迭代)
+//性能和自顶向下的相比的话，会稍微差一点，但是这个算法的nb的地方在于他没有用数组的索引来取值，可以对链表进行排序！！！！！
+public class SortMergeBU {
+    SortLiner stl=new SortLiner();
+    SortTestHelper sth=new SortTestHelper();
+    void SortBU(int [] a) {
+        for(int size=1;size&lt;=a.length;size+=size) {
+            for(int i=0;i+size&lt;a.length;i+=size*2) {//size为处理的最小单位，1,2,4,8 。。。 但是为了处理数组越界的问题 1. i+size&lt;n  2.minimum(i+size*2-1,a.length-1)
+                stl.merge(a,i,i+size-1,minimum(i+size*2-1,a.length-1));//对两个数组a[i,i+size-1] 和a[i+2*size-1]进行合并
+            }
+        }
+        sth.printArray(a);
+    }
+    int minimum(int a,int b) {
+        if(a&lt;b)
+            return a;
+        else
+            return b;
+    }
+
+}
+</code></pre><p><strong>非递归实现(迭代实现)注意点</strong><br>1.迭代实现也需要开辟额外的数组空间，只要merge，就需要开辟。<br>2.注意size，i的取值，以及边界条件。<br>3.边界问题的处理，i&lt;a.length,和i+size-1&lt;=a.length取交集，为i+size&lt;a.length 第二个边界处理，i+2<em>size-1&lt;a.length,处理方法为比较i+2</em>size-1 和 a.length的大小，取较小的作为边界。<br><strong>归并算法的优化</strong><br>1.当递归到l-r&lt;15的时候，进行插入排序，会有更好的效果。（<em>不知道为啥？？？待处理</em>）<br>2.如果copy[mid]&lt;copy[mid+1],此时就不用再进行merge操作了，已经有序了</p>
+<p>###快速排序(20世纪最伟大的算法之一)</p>
+<p>####1.单路快速排序<br><strong>快速排序的思想</strong> 将数据的第一个位置插入到合适的位置，使得它前面的元素都是小于它的，他后面的元素都是大于它的，相当于把数组分成3部分，&lt;v,=v,&gt;v，然后进行递归，就完成了整个数组的排序。<strong>如何将第一个元素放到合适的位置</strong>，并对数组完成了分组呢？这个是快速排序的核心(partition)。方法：索引的建立， <strong>j索引</strong> (&gt;v,&lt;v的分界点)， <strong>i</strong>索引(遍历索引)，<strong>temp</strong>值(数组第一个位置元素的值)对i进行遍历，如果a[i]&gt;temp,不做变化，如果a[i]&lt;temp,交换a[i]和&gt;v的数组的第一个元素的值，即a[j+1],然后j++。最后，遍历结束后，交换a[j]和a[l],返回j索引，对a[l,p-1] 和 a[p+1,r]递归排序。<br>单路快排图片：<img src="https://i.imgur.com/V8iS06W.png" alt><br><strong>单路快速排序代码实现</strong>  </p>
+<pre><code>public class QuickSort {
+SortTestHelper sth=new SortTestHelper();
+void quickSort(int [] a) {
+    quickSortSon(a,0,a.length-1);//递归函数的构造  递归的本质是将相同的问题不断地缩小规模，然后逐个解决
+    //sth.printArray(a);
+}
+void quickSortSon(int [] a,int l,int r) {//对数组a[l,r]左闭合右闭合进行排序       ！！！注意对递归函数的构建，对个人来说也是一个难点！！！！
+    if(l&gt;=r)
+        return;//递归终止条件
+
+    int p=getIndexOfBound(a,l,r);//返回一个索引，在这函数执行完之后，满足a[l,p-1]&lt;a[p]   a[p,r]&gt;a[p]
+    quickSortSon(a,l,p-1);//傻逼的错误！！！！！ 之前 quickSort(a,0,p-1) 应该改为 quickSort(a,l,p-1)
+    quickSortSon(a,p+1,r);
+}
+int getIndexOfBound(int [] a,int l,int r) {
+    int d=sth.createRandomNum(l,r);//数组最左边的索引  (快速排序的优化就发生在partition的过程中，改进之前，每次考虑的元素为数组的最左边的元素，改进之后，用随机数的索引作为考虑的元素)
+    int mid=0;//这样做对于近乎有序的数据的排序有十分大的改进，经过数学证明，算法的期望值为n*log(n),退化为n*n级别的算法概率几乎为0
+    mid=a[d];
+    a[d]=a[l];
+    a[l]=mid;
+    int temp=a[l];
+    int j=l;//分界索引 注意j的起始位置，试了之后发现从l开始比较好
+    int transfer=0;
+    for(int i=l+1;i&lt;=r;i++) {//i的起始位置为l+1!!!! 注意=号要加上！！！！！！（不加就错了）因为是闭区间，如果不加=，就取不到最后一位
+        if(a[i]&lt;temp) {//如果后一个元素比v小,将a[i]和&gt;v数组中的最小元素  a[j+1] 交换位置，同时j++
+            transfer=a[i];
+            a[i]=a[j+1];
+            a[j+1]=transfer;
+            j++;
+        }
+    }
+    transfer=a[j];//为什么不能使用swap函数
+    a[j]=a[l];
+    a[l]=transfer;
+
+    return j;
+}
+</code></pre><p>}<br><strong>注意点</strong><br>1.partition操作中，j分界索引的建立。  </p>
+<p>####2.双路快速排序<br><strong>双路快排算法思想</strong><br>1.遍历从<strong>两边开始遍历</strong>，<strong>i(左边遍历索引),j(右边遍历索引)索引建立</strong>。当i遍历到a[i]&gt;=a[l]结束遍历，j便利到a[j]&lt;=a[l]时结束，然后当两个都遍历结束时，交换两个索引所指向的值，i++,j++。所有遍历结束后，交换a[l],a[j]的值。返回j索引，然后递归遍历a[l,j-1] a[j+1,r]。和单路快排比较的优点，将<strong>=v的元素均分到两边，达到一种更趋近于logn 的分级</strong>，使得算法时间复杂度更趋近于nlogn.<br><strong>双路快排图片演示</strong>  <img src="https://i.imgur.com/wTtuIvi.png" alt><br><strong>双路快排代码实现</strong>  </p>
+<pre><code>public class DoubleQuickSort {
+SortTestHelper sth=new SortTestHelper();
+SortSquare ssq=new SortSquare();
+void doubleQuickSort(int [] a) {
+    doubleQuickSortSon(a,0,a.length-1);
+    sth.printArray(a);
+}
+void doubleQuickSortSon(int [] a,int l,int r) {//对数组a[l,r]左闭右闭进行排序
+    if(r-l&lt;=30) {//递归终止条件没有加                                      //？？？？？？为什么不在小范围进行插入排序，直接采用递归的方式会报数组越界的问题？？？？？？？？
+        ssq.UpdateInsertSort(a);
+        return ;
+    }
+    int p=partition(a,l,r);//返回边界的索引
+    doubleQuickSortSon(a,l,p-1);
+    doubleQuickSortSon(a,p+1,r);
+}
+int partition(int [] a,int l,int r) {//对单路返回索引的改进，采用从两头开始遍历，这样的好处在于当处理有很多重复的数据时，能更好的将重复的数据平分给两边，从而达到一种logn的分级。
+    int j=r;//右边的遍历索引
+    int i=l+1;//左边的遍历索引
+    int mid=0;//进行优化，随机出来一个数，作为参照值，防止有序数据对数组的退化
+    mid=sth.createRandomNum(l, r);
+    sth.swap(a[l], a[mid]);
+    while(true) {//注意while循环的使用 while循环内部为循环条件
+        while(a[i]&lt;a[l]&amp;&amp;i&lt;=r) i++;//数组越界
+        while(a[j]&gt;a[l]&amp;&amp;j&gt;=l+1) j--;
+        if(i&gt;j) break;
+        sth.swap(a[i], a[j]);
+        i++;
+        j--;
+    }
+    sth.swap(a[l],a[j]);
+    return j;
+
+}
+</code></pre><p>}<br><strong>注意点</strong><br>1.<strong>while语句的使用，外层为while(true),内层为两个while(),break的使用</strong>。<br>2.数组越界的处理<br>3.索引的建立与维护。<br><strong>优化</strong><br>1.在r-l&lt;15时，用插入排序代替。<br>2.不以数组的第一个元素作为参照点，而是随机产生一个值作为参照点。目的在于产生更加均衡的分级。  </p>
+<p>####3.三路快速排序<br><strong>三路快速排序算法思想</strong> 三路快速排序中的三路不是指从三个方向进行遍历，其<strong>遍历方向只有一个</strong>，从左到右依次遍历。只不过它将数组分为严谨的三部分，&lt;v,=v,&gt;v,对于=v的部分，下次递归的时候不用考虑，就可以<strong>一次性不用考虑很多元素</strong>。具体实现思路：创建索引，l,r,i(遍历索引),lt(&lt;v的索引最大值),rt(&gt;v的索引最小值).对当前遍历到的元素a[i]进行分类考虑，a[i]&gt;v,a[i]&lt;v,a[i]=v.然后进行相应的操作。遍历完之后，交换a[l]和 a[lt+1],然后对a[l,lt] a[rt,r]进行递归实现。<br>三路快排图片演示  <img src="https://i.imgur.com/F4hVajZ.png" alt><br><strong>三路快排代码实现</strong>  </p>
+<pre><code>public class ThreeWayQuickSort {
+SortTestHelper sth=new SortTestHelper();
+SortSquare ssq=new SortSquare();
+void quickSort(int [] a) {//对数组a进行排序
+    quickSortSon(a,0,a.length-1);
+    sth.printArray(a);
+}
+void quickSortSon(int [] a,int l,int r) {//对数组a[l,r]左闭右闭进行递归排序
+    if (r-l&lt;15) {
+        ssq.UpdateInsertSort(a);
+        return ;
+    }
+    int lt=l;//小于v的数据的右边端点
+    int rt=r+1;//大于v的数据的左边端点 注意初始值的选取，选取r+1。[rt,r]&gt;v   [l+1,lt]&lt;v [lt+1,i)=v
+    int i=l+1;//左边遍历索引 只需要从一个方向遍历
+    int mid=sth.createRandomNum(l, r);
+    sth.swap(a[l], a[mid]);
+    while(i&lt;rt) {//对于这种需要从多边遍历的，使用while循环，不用for循环更方便
+        if(a[i]==a[l]) {
+            i++;
+        }else if(a[i]&lt;a[l]){
+            sth.swap(a[i], a[lt+1]);//交换位置 交换的位置错误！！！！！应该为lt+1的位置
+            lt++;
+            i++;
+        }else if(a[i]&gt;a[l]) {
+            sth.swap(a[i], a[rt-1]);//不用维护索引i，因为替换过来的a[i]还没有被处理 ！！！！交换位置错误，应该为rt-1的位置
+            rt--;
+        }
+    }        
+    sth.swap(a[l], a[lt+1]);//当遍历完之后，swap一下[l]和 a[lt+1]
+    quickSortSon(a,l,lt);
+    quickSortSon(a,rt,r);
+}                                //关于partition（）有无的问题，返回结果为数组，就不将partition（）单独拉出来写个函数了！！！
+</code></pre><p>}<br><strong>优点</strong><br>对于处理<strong>重复元素</strong>较多的数据，可以达到很快的速度，因为可以过滤掉很多不必考虑的元素。  </p>
 <p>##各种排序算法的比较以及应用场景</p>
 
           
