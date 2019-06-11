@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="欢迎来到wyk的博客">
 <meta property="og:description" content="算法学习第二个月末尾复盘与总结   学了什么 经过两个月的算法学习，终于算是将算法的基本的东西学习和实践了一遍，包括排序算法；堆，索引堆，索引堆的优化（反向查找）；二分查找（查找问题）；二分搜索树，树的建立，二分搜索树的三种遍历方式（深度优先遍历），层序遍历，树中元素的增删改查操作，二分搜索树的局限性问题以及解决方案（红黑树），由二分搜索树引申的树形问题（快排，归排）；并查集，三个版本的并查集以及">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-06-07T09:32:16.100Z">
+<meta property="og:updated_time" content="2019-06-11T08:10:26.389Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Arithmetic2">
 <meta name="twitter:description" content="算法学习第二个月末尾复盘与总结   学了什么 经过两个月的算法学习，终于算是将算法的基本的东西学习和实践了一遍，包括排序算法；堆，索引堆，索引堆的优化（反向查找）；二分查找（查找问题）；二分搜索树，树的建立，二分搜索树的三种遍历方式（深度优先遍历），层序遍历，树中元素的增删改查操作，二分搜索树的局限性问题以及解决方案（红黑树），由二分搜索树引申的树形问题（快排，归排）；并查集，三个版本的并查集以及">
@@ -383,7 +383,126 @@ void shiftDown2(int [] a,int n,int k) {//对索引k位置进行shiftDown,注意�
     }
 </code></pre><p>7.<strong>索引堆</strong><br>1.为什么使用索引堆？？<br>因为当某个任务的权重变化的时候，堆不能改变这个任务的权重。而索引堆可以巧妙地解决这个问题。索引堆indexes[],用来存放数组的索引，而数据本身没有任何变化。shiftUp(),shiftDown()的也是索引，而不是数据，但是需要利用数据来进行比较。<br>2,索引堆在insert()时，需要指定插入的索引和数据。<br>3.索引堆的最主要方法，change(),传入两个参数，索引，权重，改变某个任务的权重。  </p>
 <p>8.<strong>索引堆的优化（反向查找）</strong><br>利用索引堆，每次找索引i在索引堆中的顺序的时候，都需要遍历一遍索引堆。indexes[j]==i。可以利用反向查找，开辟一个新的数组空间，reverse[],来存放索引在堆中的位置。<br>reverse[indexes[i]]=i<br>indexes[reverse[i]]=i  </p>
-<p><em>反思</em>  </p>
+<hr>
+<p><strong>二分搜索树</strong>  </p>
+<p><strong>解决了什么问题？</strong>  </p>
+<p>搜索(查找)问题，可以实现O（n）的时间复杂度  </p>
+<p>1.<strong>二分搜索树的定义</strong><br>二分搜索树不是一棵完全二叉树，因此，不能像堆那样，用数组来进行实现，而使用一个个的节点来实现。<br>a.每个节点的key值大于左子树中所有节点的key，小于右子树中所有节点的key值。<br>b.每个节点的左右子树也是一棵二分搜索树。（天然递归的性质）  </p>
+<p>2.<strong>二分搜索树的性质</strong><br>天然递归，所有的操作，包括（增，删，改，查）都是通过递归来完成的。  </p>
+<p>3.<strong>二分搜索树的基本操作</strong><br>a.<strong>插入节点，删除节点</strong>。<br>这两个操作可以放在一起，因为这两个操作的递归函数递归回溯的时候返回的跟节点一直在更新。  </p>
+<pre><code>void insert(int key,int value){//向二分搜索树中插入节点
+    root=dgInsert(root,key,value);//用递归的方式向二分搜索树中插入节点  因为二分搜索树自带递归的性质
+}
+
+private BinarySearchTreeNode dgInsert(BinarySearchTreeNode node,int key,int value){
+    if(node==null) {//递归到底的情况，就是找到了插入的位置（注意，这里判断的是节点本身，而不是节点的value）
+        count++;//插入了一个元素，count++
+        return new BinarySearchTreeNode(key,value);
+    }
+    //下面的3个语句选择执行一条，当执行完毕的时候，返回node
+    if(key==node.key) {
+        node.value=value;//此时是更新节点了，而不是插入节点
+    }else if(key&lt;node.key) {//根据二分搜索树的定义，左子树的键值小，所以在左边
+        node.leftTree=dgInsert(node.leftTree,key,value);//此时，root的左节点就成为了根节点
+    }else
+        node.rightTree=dgInsert(node.rightTree,key,value);//此时，root的右节点就变成了根节点。
+
+    return node;//入过执行到这条语句，说明是更新操作，将该节点原路返回
+
+}
+</code></pre><p>b.<strong>查找节点</strong><br>这个操作在递归到底的时候只需要返回找到的节点就ok了，返回的值每次都是固定的。  </p>
+<pre><code>BinarySearchTreeNode bsSearch(int key) {//在二分搜索树中进行查找key的值，返回整个节点
+    return dgBsSort(root,key);
+}
+/**
+ * 查找节点，注意返回值和删除节点和插入节点的区别！！！！最为关键的地方！！！
+ * @param bstd
+ * @param key
+ * @return
+ */
+private BinarySearchTreeNode dgBsSort(BinarySearchTreeNode bstd,int key) {//在以bstd为根节点的二分搜索树中进行查找key对应的节点
+    if(bstd==null) {//递归终止条件的考虑
+        return null;
+    }
+    if(key==bstd.key) {
+        return bstd;//这个地方返回的是该节点 db(20)-&gt;db(20),然后后面的db(26)-&gt;db(20)  db(36)-&gt;db(20) 都是返回db(20)!!!!
+    }
+    else if(key&lt;bstd.key) {
+        return dgBsSort(bstd.leftTree,key);
+    }else {
+        return dgBsSort(bstd.rightTree,key);
+    }
+
+}
+</code></pre><p>c.<strong>删除含有两个子节点的节点（Hibberd算法）</strong><br>这个操作算是二分搜索树的最难的操作。<br>先找到要删除的节点的位置，然后找到这个节点的右子树中的最小节点（这个节点会作为后继节点），然后进行操作。</p>
+<pre><code>//hibberd算法部分
+    BinarySearchTreeNode d=node;//将这个节点保存下来，为d节点
+    BinarySearchTreeNode s=new BinarySearchTreeNode(miniMumNode(d.rightTree));//s为d的继承节点，是d节点右子树中的最小节点（根据hibberd算法) 后面讲node.right给删除了，为此，复制一下这个节点
+    count++;//新建了个节点
+    s.rightTree=dgDeleteMinNode(d.rightTree);//删除以d.right节点为根节点的最小节点，并将d.right返回 (这个地方会报**空指针异常**，因为把d节点给删除了，所以d没了)
+    s.leftTree=d.leftTree;
+    count--;
+    return s;//s为新树的根节点，将之返回
+}
+</code></pre><p>d.<strong>二分搜索树的遍历  </strong><br>每个节点都会被访问3次，三种不同的遍历方式的决定了遍历到该节点的第几次做事情。<br>A.深度优先遍历<br>1.前序遍历  </p>
+<pre><code>void preOrder() {//前序遍历  每棵二叉搜索树提供一个遍历方法
+
+    dgPreOrder(root);
+
+}
+
+private void dgPreOrder(BinarySearchTreeNode bstd) {//递归遍历以bstd为根节点的二分搜索树
+    if(bstd!=null) {
+        System.out.println(bstd.key);//先打印这个节点的key，在遍历左子树，最后遍历右子树
+        dgPreOrder(bstd.leftTree);
+        dgPreOrder(bstd.rightTree);
+    }
+
+}
+</code></pre><p>2.中序遍历  </p>
+<pre><code>void midOrder() {//对外提供的接口  中序遍历
+
+    dgMidOrder(root);
+
+}
+
+private void dgMidOrder(BinarySearchTreeNode bstd) {//对以bstd为根节点的二叉搜索树进行遍历 
+    if(bstd!=null) {
+        dgMidOrder(bstd.leftTree);
+        System.out.println(bstd.key);//输出的顺序在中间
+        dgMidOrder(bstd.rightTree);
+
+    }
+}
+</code></pre><p>3.后续遍历  </p>
+<pre><code>void backOrder() {//对外提供的接口    后序遍历
+
+    dgBackOrder(root);
+}
+private void dgBackOrder(BinarySearchTreeNode bstd) {
+    if(bstd!=null) {
+        dgBackOrder(bstd.leftTree);
+        dgBackOrder(bstd.rightTree);
+        System.out.println(bstd.key);//最后打印
+
+    }
+}
+</code></pre><p>B.广度优先遍历<br>利用队列来实现</p>
+<pre><code>void levelOrder() throws InterruptedException {
+    BlockingQueue&lt;BinarySearchTreeNode&gt; queue=new ArrayBlockingQueue&lt;BinarySearchTreeNode&gt; (10);//创建队列   这种队列容量是固定的
+    queue.put(root);//将根节点入队
+    while(!queue.isEmpty()) {//如果队列不为空
+        BinarySearchTreeNode node=queue.poll();//取出头节点，并将它出队
+        System.out.println(node.key);
+        if(node.leftTree!=null) {
+            queue.put(node.leftTree);//让出队的节点的左右节点入队
+        }
+        if(node.rightTree!=null) {
+            queue.put(node.rightTree);
+        }
+
+    }
+</code></pre><p><em>反思</em>  </p>
 <p>1.学习了这些基本的东西，就相当于学习了很多解决了实际问题的<strong>工具</strong>，既然是工具，那么必须经常使用才能熟练掌握这些工具，只需掌握最基本，最有用的工具（针对于解决问题），此外，这些工具本身也需要经常来回忆（类似于打仗磨枪，日常需要经常擦一擦工具）。</p>
 <p>2.当遇到语言本身的不懂得一些，或者不熟练的地方时，要舍得花时间去解决这个问题，不然下次还会遇到，如果不花时间，对编码能力的提升很不利。第二个月做的很好，对于不太熟悉的地方（泛型，容器）舍得花时间去钻研，继续保持。</p>
 <p>3.提高算法能力，解决问题能力的唯一途径就是刷题。</p>
